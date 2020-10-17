@@ -18,8 +18,8 @@ def a_star(maze):
 class Maze:
     def __init__(self, x, y):
         self.board = [[None for _ in range(y)] for _ in range(x)]
-        self.spawn = []
-        self.end = []
+        self.spawn = ()
+        self.end = ()
         self.solution = []
 
     def print(self):
@@ -39,9 +39,9 @@ maze = Maze(x, y)
 for i in range(x):
     line = [char for char in input()]
     for j in range(len(line)):
-        if (j == "$"):
+        if (line[j] == "$"):
             maze.spawn = i, j
-        elif (j == "#"):
+        elif (line[j] == "#"):
             maze.end = i, j
 
         maze.board[i][j] = line[j] 
