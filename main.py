@@ -6,124 +6,178 @@ def bfs(maze):
 def dfs(maze):
     return
 
-def best_first(maze):
-    return
 
 def hill_climbing(maze):
     return
 
+# Class that represents a node
 class Node:
-        def __init__(self, parent = None, position = None):
-            self.parent = parent
-            self.position = position
+    def __init__(self, parent = None, position = None):
+        self.parent = parent
+        self.position = position
 
-            self.costToCurr = 0
-            self.heuristic = 0
-            self.totalCost = 0
+        self.g = 0 #distance to start node
+        self.h = 0 #distance to goal node
+        self.f = 0 #total cost
 
-        def __eq__ (self, other):
-            return self.position == other.position
+    #compare nodes
+    def __eq__ (self, other):
+        return self.position == other.position
+    # sort nodes
+    def __lt__ (self, other):
+        return self.f < other.f
 
-def return_path(current_node, maze):
-    path = []
 
-    result = [[-1 for i in range(len(maze.board))] for j in range(len(maze.board[0]))]
-    current = current_node
+#Manhattan distance used in A* heuristic
+def heuristic(current, end):
+    return ((abs(current.position[0] - end.position[0])) + (abs(current.position[1] - end.position[1])))
 
-    while current is not None:
-        path.append(current.position)
-        current = current.parent
-
-    path = path[:: -1]
-    start_value = 0
-
-    for i in range(len(path)):
-        result[path[i][0]][path[i][1]] = start_value
-        start_value += 1
-    
-    return result
-#! change to manhattan distance
-def heuristic(child, end):
-    return (((child.position[0] - end.position[0]) ** 2) +
-            ((child.position[1] - end.position[1]) ** 2))
-
-def a_star(maze):
+#Best First Search
+def best_first(maze):
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
-    start_node.costToCurr = start_node.heuristic = start_node.totalCost = 0
     # initialize end node
     end_node = Node(None, tuple(maze.end))
-    end_node.costToCurr = end_node.heuristic = end_node.totalCost = 0
 
+    #lists of nodes to visit and visited nodes
     yet_to_visit = []
     visited = []
 
+     #Add start node
     yet_to_visit.append(start_node)
 
-    outer_iterations = 0
-    max_iterations = (len(maze.board) // 2) ** 10
-
-
+    #possible moves
     move = [[-1,0], #up
             [0,-1],  #left
             [1,0],  #down
             [0,1]]  #right
 
+    #Loop until finds the goal
     while len(yet_to_visit) > 0:
-        print(len(yet_to_visit))
-        outer_iterations += 1
+
+        #Sort the list to get the node with the lowest cost first
+        yet_to_visit.sort()
 
         #get current node
-        current_node = yet_to_visit[0]
-        current_index = 0
-        for index, item in enumerate(yet_to_visit):
-            if item.totalCost < current_node.totalCost:
-                current_node = item
-                current_index = index
+        current_node = yet_to_visit.pop(0)
 
-        if outer_iterations > max_iterations:
-            print("giving up on patfinding too many iterations")
-            return return_path(current_node, maze)
-        
-        yet_to_visit.pop(current_index)
+        #Mark current node as visited
         visited.append(current_node)
-        print(current_node)
-        if current_node == end_node:
-            return return_path(current_node, maze)
-        
-        children = []
 
+        #If reached the goal, return the path solution
+        if current_node == end_node:
+            while current_node != start_node:
+                maze.solution.append(current_node.position)
+                current_node = current_node.parent
+
+            return maze.solution
+
+        
         for new_position in move:
+            #Get node position
             node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
 
+            #Check if node position is out of boundaries
             if(node_position[0] > (len(maze.board) - 1) or
                 node_position[0] < 0 or
                 node_position[1] > (len(maze.board[0]) - 1) or
-                node_position[1] < 0):
+                node_position[1] < 0):         
                 continue
-
-            if maze.board[node_position[0]][node_position[1]] != "*":
+            
+            # check if node position is actually a wall
+            if maze.board[node_position[0]][node_position[1]] == "-":   
                 continue
-
-            new_node = Node(current_node, node_position)
-
-            children.append(new_node)
-
-        for child in children:
-            if len([visited_child for visited_child in visited if visited_child == child]) > 0:
+            
+            #Create neighbor node and checks if is in the visited list
+            neighbor = Node(current_node, node_position)
+            if neighbor in visited:
                 continue
+            
+            #Create f value according to heuristic
+            neighbor.f = heuristic(neighbor, end_node)
 
-            child.costToCurr = current_node.costToCurr + maze.cost
+            #Check if neighbor is in yet_to_visit list and if it has a lower f value,
+            # if not, add to yet_to_visit list
+            if len([i for i in yet_to_visit if neighbor == i and neighbor.f >= i.f]) <= 0:
+                yet_to_visit.append(neighbor)
 
-            child.heuristic = heuristic(child, end_node)
+    # return None if path is not found
+    return None
 
-            child.totalCost = child.costToCurr + child.heuristic
+#A star search        
+def a_star(maze):
+    # initialize start node
+    start_node = Node(None, tuple(maze.spawn))
+    # initialize end node
+    end_node = Node(None, tuple(maze.end))
 
-            if len([i for i in yet_to_visit if child == i and child.costToCurr > i.costToCurr]) > 0:
+    #lists of nodes to visit and visited nodes
+    yet_to_visit = []
+    visited = []
+
+    #Add start node
+    yet_to_visit.append(start_node)
+    
+    #possible moves
+    move = [[-1,0], #up
+            [0,-1],  #left
+            [1,0],  #down
+            [0,1]]  #right
+
+    #Loop until finds the goal
+    while len(yet_to_visit) > 0:
+
+        #Sort the list to get the node with the lowest cost first
+        yet_to_visit.sort()
+
+        #get current node
+        current_node = yet_to_visit.pop(0)
+
+        #Mark current node as visited
+        visited.append(current_node)
+
+        #If reached the goal, return the path solution
+        if current_node == end_node:
+            while current_node != start_node:
+                maze.solution.append(current_node.position)
+                current_node = current_node.parent
+
+            return maze.solution
+
+        
+        for new_position in move:
+            #Get node position
+            node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
+
+            #Check if node position is out of boundaries
+            if(node_position[0] > (len(maze.board) - 1) or
+                node_position[0] < 0 or
+                node_position[1] > (len(maze.board[0]) - 1) or
+                node_position[1] < 0):         
                 continue
+            
+            # check if node position is actually a wall
+            if maze.board[node_position[0]][node_position[1]] == "-":   
+                continue
+            
+            #Create neighbor node and checks if is in the visited list
+            neighbor = Node(current_node, node_position)
+            if neighbor in visited:
+                continue
+            
+            #Create f,g and h values
+            neighbor.g = current_node.g + maze.cost
+            neighbor.h = heuristic(neighbor, end_node)
+            neighbor.f = neighbor.g + neighbor.h
 
-            yet_to_visit.append(child)
+            #Check if neighbor is in yet_to_visit list and if it has a lower f value,
+            # if not, add to yet_to_visit list
+            if len([i for i in yet_to_visit if neighbor == i and neighbor.f >= i.f]) <= 0:
+                yet_to_visit.append(neighbor)
 
+    # return None if path is not found
+    return None
+       
 class Maze:
     def __init__(self, x, y):
         self.board = [[None for _ in range(y)] for _ in range(x)]
@@ -155,10 +209,19 @@ for i in range(x):
             maze.end = i, j
         maze.board[i][j] = line[j]
         
+# maze.print()
 
 # bfs(maze)
-# dfs(maze)
-# best_first(maze)
-path = a_star(maze)
-print(path)
+# dfs(maze)start_time = time.time()
+start_time = time.time()
+best_first(maze)
+print("Best-First Search:")
+print(maze.solution[::-1])
+print("--- %s seconds ---" % (time.time() - start_time))
+start_time = time.time()
+a_star(maze)
+print("A star:")
+print(maze.solution[::-1])
+print("--- %s seconds ---" % (time.time() - start_time))
+
 # hill_climbing(maze)
