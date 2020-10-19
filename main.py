@@ -1,5 +1,6 @@
 import time
 import copy
+import random
 
 
 # Returns a list of all valid moves based on the possible_moves and a position in a maze
@@ -246,6 +247,53 @@ def a_star(maze):
 
     # return None if path is not found
     return None
+
+#Manhattan distance used in hill climbing heuristic
+def hc_heuristic(current, end):
+    return ((abs(current[0] - end[0])) + (abs(current[1] - end[1])))
+
+def hill_climbing(original_maze):
+    # Creates a copy of the original maze
+    maze = copy.deepcopy(original_maze)
+
+    # Sets initial position
+    cur_pos = maze.spawn
+    prev_pos = None
+
+    # Get valid moves for that position
+    moves = get_valid_moves(maze.board, cur_pos)
+
+    # While there are valid moves
+    while moves:
+        # If our hill climber has moved, add to solution
+        if cur_pos != prev_pos:
+            original_maze.solution.append(cur_pos)
+
+        # Stochastic hill climbing
+        # We figured this would be the best for a simple maze because no direction is always better than another for any maze
+        # so where we start doesn't matter. And since we only have 4 neighbors, you can only get 1 unit closer at a time, so
+        # a steepest-ascent hill climb would only make it slower
+        move = random.choice(moves)
+
+        # Stop movement if we reach the end
+        if move == maze.end:
+            original_maze.solution.append(move)
+            return original_maze.solution
+        else:
+            prev_pos = cur_pos
+
+            # If moving to the selected pos would make the climber get closer to the end, move
+            if hc_heuristic(move, maze.end) <= hc_heuristic(cur_pos, maze.end):
+                cur_pos = move
+
+            # So that we don't evaluate it again
+            maze.board[move[0]][move[1]] = 'x'
+
+            # Get new valid moves
+            moves = get_valid_moves(maze.board, cur_pos)
+
+    # If we can't reach the end
+    return None
        
 class Maze:
     def __init__(self, x, y):
@@ -285,9 +333,11 @@ for i in range(x):
 start_time = time.time()
 # bfs(maze)
 # print("DFS Search:")
+print("Hill Climbing Search:")
+hill_climbing(maze)
+print(maze.solution)
+print("--- %s seconds ---" % (time.time() - start_time))
 # dfs(maze)
-# print(maze.solution)
-# print("--- %s seconds ---" % (time.time() - start_time))
 # best_first(maze)
 # print("Best-First Search:")
 # start_time = time.time()
@@ -296,4 +346,3 @@ start_time = time.time()
 # print(maze.solution[::-1])
 # print("--- %s seconds ---" % (time.time() - start_time))
 
-# hill_climbing(maze)
