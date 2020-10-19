@@ -62,7 +62,6 @@ def bfs_traceback(maze, parents):
 
 # Fills te previous_access_matrix while doing the actual DFS
 def aux_dfs(maze, current_node, previous_access_matrix):
-
   # Marks the current node that it is in as already visited
   maze.board[current_node[0]][current_node[1]] = 'x'
 
@@ -70,22 +69,22 @@ def aux_dfs(maze, current_node, previous_access_matrix):
   # The conditions are that it does not goes out of the matrix and is a valid walk point
 
   # Walks to the right if the conditions to do so are met
-  if(current_node[1]+1 < maze.shape[1] and (maze.board[current_node[0]][current_node[1]+1] != '_'):
+  if(current_node[1]+1 < maze.shape[1] and (maze.board[current_node[0]][current_node[1]+1] == '*' or maze.board[current_node[0]][current_node[1]+1] == '$')):
     previous_access_matrix[current_node[0]][current_node[1]+1] = current_node
     aux_dfs(maze, (current_node[0], current_node[1]+1), previous_access_matrix)
   
   # Walks to the bottom if the conditions to do so are met
-  if(current_node[0]+1 < maze.shape[0] and (maze.board[current_node[0]+1][current_node[1]] != '_'):
+  if(current_node[0]+1 < maze.shape[0] and (maze.board[current_node[0]+1][current_node[1]] == '*' or maze.board[current_node[0]+1][current_node[1]] == '$')):
     previous_access_matrix[current_node[0]+1][current_node[1]] = current_node
     aux_dfs(maze, (current_node[0]+1, current_node[1]), previous_access_matrix)
 
   # Walks to the left if the conditions to do so are met
-  if(current_node[1]-1 > 0 and (maze.board[current_node[0]][current_node[1]-1] != '_'):
+  if(current_node[1]-1 > 0 and (maze.board[current_node[0]][current_node[1]-1] == '*' or maze.board[current_node[0]][current_node[1]-1] == '$')):
     previous_access_matrix[current_node[0]][current_node[1]-1] = current_node
     aux_dfs(maze, (current_node[0], current_node[1]-1), previous_access_matrix)
 
   # Walks to the top if the conditions to do so are met
-  if(current_node[0]-1 > 0 and (maze.board[current_node[0]-1][current_node[1]] != '_'):
+  if(current_node[0]-1 > 0 and (maze.board[current_node[0]-1][current_node[1]] == '*' or maze.board[current_node[0]-1][current_node[1]] == '$')):
     previous_access_matrix[current_node[0]-1][current_node[1]] = current_node
     aux_dfs(maze, (current_node[0]-1, current_node[1]), previous_access_matrix)
 
@@ -104,7 +103,6 @@ def dfs_recover_inverted_path(previous_access_matrix, begin, end):
 # Finds the path while recovering an matrix that has in each of the nodes the previous node from wich the current was accessed
 # that was generated while doin the DFS
 def dfs(original_maze):
-
   # Creates a copy of the original maze
   maze = copy.deepcopy(original_maze)
 
@@ -121,9 +119,6 @@ def dfs(original_maze):
   path = path[::-1]
 
   return path
-
-def hill_climbing(maze):
-    return
 
 # Class that represents a node
 class Node:
