@@ -40,7 +40,8 @@ def bfs(original_maze):
 
             # If has reached the end, discovers tracback and returns
             if move == maze.end:
-                return bfs_traceback(maze, parents)
+                original_maze.bfs_solution = bfs_traceback(maze, parents)
+                return original_maze.bfs_solution
             # If hasn't reached the end yet, marks the node as visited and add it to the queue
             else:
                 maze.board[move[0]][move[1]] = 'x'
@@ -118,6 +119,7 @@ def dfs(original_maze):
 
     # Inverts the inverted path, correcting it
     path = path[::-1]
+    original_maze.dfs_solution = path
 
     return path if len(path) > 0 else None
 
@@ -154,8 +156,6 @@ def best_first(maze):
     yet_to_visit = [start_node]
     visited = []
 
-    solution = []
-
     #Loop until finds the goal
     while len(yet_to_visit) > 0:
 
@@ -171,11 +171,11 @@ def best_first(maze):
         #If reached the goal, return the path solution
         if current_node == end_node:
             while current_node != start_node:
-                solution.insert(0, current_node.position)
+                maze.best_first_solution.insert(0, current_node.position)
                 current_node = current_node.parent
-            solution.insert(0, current_node.position)
+            maze.best_first_solution.insert(0, current_node.position)
 
-            return solution
+            return maze.best_first_solution
 
         moves = get_valid_moves(maze.board,current_node.position)
         
@@ -208,8 +208,6 @@ def a_star(maze):
     yet_to_visit = [start_node]
     visited = []
     
-    solution = []
-
     #Loop until finds the goal
     while len(yet_to_visit) > 0:
 
@@ -225,11 +223,11 @@ def a_star(maze):
         #If reached the goal, return the path solution
         if current_node == end_node:
             while current_node != start_node:
-                solution.insert(0, current_node.position)
+                maze.a_star_solution.insert(0, current_node.position)
                 current_node = current_node.parent
-            solution.insert(0, current_node.position)
+            maze.a_star_solution.insert(0, current_node.position)
 
-            return solution
+            return maze.a_star_solution
 
         moves = get_valid_moves(maze.board, current_node.position)
         
@@ -272,7 +270,7 @@ def hill_climbing(original_maze):
     while moves:
         # If our hill climber has moved, add to solution
         if cur_pos != prev_pos:
-            original_maze.solution.append(cur_pos)
+            original_maze.hill_climbing_solution.append(cur_pos)
 
         # Stochastic hill climbing
         # We figured this would be the best for a simple maze because no direction is always better than another for any maze
@@ -282,8 +280,8 @@ def hill_climbing(original_maze):
 
         # Stop movement if we reach the end
         if move == maze.end:
-            original_maze.solution.append(move)
-            return original_maze.solution
+            original_maze.hill_climbing_solution.append(move)
+            return original_maze.hill_climbing_solution
         else:
             prev_pos = cur_pos
 
@@ -306,7 +304,11 @@ class Maze:
         self.board = [[None for _ in range(y)] for _ in range(x)]
         self.spawn = ()
         self.end = ()
-        self.solution = []
+        self.bfs_solution = []
+        self.dfs_solution = []
+        self.best_first_solution = []
+        self.a_star_solution = []
+        self.hill_climbing_solution = []
         self.cost = 1
 
     def print(self):
@@ -337,50 +339,46 @@ for i in range(x):
 
 print("BFS Search:")
 start_time = time.time()
-bfs_solution = bfs(maze)
-if bfs_solution != None:
-    print(bfs_solution)
-    print("--- %s seconds ---\n" % (time.time() - start_time))
-else:
-    print("Has not found any solution\n")
+solution = bfs(maze)
+
+print(maze.bfs_solution)
+print("--- %s seconds ---" % (time.time() - start_time))
+if solution == None:
+    print("Has not found any solution")
     
 
-print("DFS Search:")
+print("\nDFS Search:")
 start_time = time.time()
-dfs_solution = dfs(maze)
+solution = dfs(maze)
 
-if dfs_solution != None:
-    print(dfs_solution)
-    print("--- %s seconds ---\n" % (time.time() - start_time))
-else:
-    print("Has not found any solution\n")
+print(maze.dfs_solution)
+print("--- %s seconds ---" % (time.time() - start_time))
+if solution == None:
+    print("Has not found any solution")
 
-print("Best-First Search:")
+print("\nBest-First Search:")
 start_time = time.time()
-best_first_solution = best_first(maze)
+solution = best_first(maze)
 
-if best_first_solution != None:
-    print(best_first_solution)
-    print("--- %s seconds ---\n" % (time.time() - start_time))
-else:
-    print("Has not found any solution\n")
+print(maze.best_first_solution)
+print("--- %s seconds ---" % (time.time() - start_time))
+if solution == None:
+    print("Has not found any solution")
 
-print("A star:")
+print("\nA star:")
 start_time = time.time()
-a_star_solution = a_star(maze)
+solution = a_star(maze)
 
-if a_star_solution != None:
-    print(a_star_solution)
-    print("--- %s seconds ---\n" % (time.time() - start_time))
-else:
-    print("Has not found any solution\n")
+print(maze.a_star_solution)
+print("--- %s seconds ---" % (time.time() - start_time))
+if solution == None:
+    print("Has not found any solution")
 
-print("Hill Climbing:")
+print("\nHill Climbing:")
 start_time = time.time()
-hill_climbing_solution = hill_climbing(maze)
+solution = hill_climbing(maze)
 
-if hill_climbing_solution != None:
-    print(hill_climbing_solution)
-    print("--- %s seconds ---" % (time.time() - start_time))
-else:
+print(maze.hill_climbing_solution)
+print("--- %s seconds ---" % (time.time() - start_time))
+if solution == None:
     print("Has not found any solution")
