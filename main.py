@@ -39,10 +39,7 @@ def bfs(original_maze):
 
             # If has reached the end, discovers tracback and returns
             if move == maze.end:
-                solution = bfs_traceback(maze, parents)
-                original_maze.solution.append(solution)
-                maze.print()
-                return solution
+                return bfs_traceback(maze, parents)
             # If hasn't reached the end yet, marks the node as visited and add it to the queue
             else:
                 maze.board[move[0]][move[1]] = 'x'
@@ -118,7 +115,7 @@ def dfs(original_maze):
   # Inverts the inverted path, correcting it
   path = path[::-1]
 
-  original_maze.solution = path
+  return path
 
 # Class that represents a node
 class Node:
@@ -153,6 +150,8 @@ def best_first(maze):
     yet_to_visit = [start_node]
     visited = []
 
+    solution = []
+
     #Loop until finds the goal
     while len(yet_to_visit) > 0:
 
@@ -168,10 +167,11 @@ def best_first(maze):
         #If reached the goal, return the path solution
         if current_node == end_node:
             while current_node != start_node:
-                maze.solution.append(current_node.position)
+                solution.insert(0, current_node.position)
                 current_node = current_node.parent
+            solution.insert(0, current_node.position)
 
-            return maze.solution
+            return solution
 
         moves = get_valid_moves(maze.board,current_node.position)
         
@@ -204,6 +204,7 @@ def a_star(maze):
     yet_to_visit = [start_node]
     visited = []
     
+    solution = []
 
     #Loop until finds the goal
     while len(yet_to_visit) > 0:
@@ -220,10 +221,11 @@ def a_star(maze):
         #If reached the goal, return the path solution
         if current_node == end_node:
             while current_node != start_node:
-                maze.solution.append(current_node.position)
+                solution.insert(0, current_node.position)
                 current_node = current_node.parent
+            solution.insert(0, current_node.position)
 
-            return maze.solution
+            return solution
 
         moves = get_valid_moves(maze.board, current_node.position)
         
@@ -254,7 +256,6 @@ class Maze:
         self.spawn = ()
         self.end = ()
         self.cost = 1
-        self.solution = []
 
     def print(self):
         for i in range(len(self.board)):
@@ -282,18 +283,55 @@ for i in range(x):
         maze.board[i][j] = line[j]
 
 
+print("BFS Search:")
 start_time = time.time()
-# bfs(maze)
-# print("DFS Search:")
-# dfs(maze)
-# print(maze.solution)
-# print("--- %s seconds ---" % (time.time() - start_time))
-# best_first(maze)
-# print("Best-First Search:")
-# start_time = time.time()
-# a_star(maze)
-# print("A star:")
-# print(maze.solution[::-1])
-# print("--- %s seconds ---" % (time.time() - start_time))
+bfs_solution = bfs(maze)
+if bfs_solution != None:
+    print(bfs_solution)
+    print("--- %s seconds ---\n" % (time.time() - start_time))
+else:
+    print("Has not found any solution\n")
+    
 
-# hill_climbing(maze)
+print("DFS Search:")
+start_time = time.time()
+dfs_solution = dfs(maze)
+
+if dfs_solution != None:
+    print(dfs_solution)
+    print("--- %s seconds ---\n" % (time.time() - start_time))
+else:
+    print("Has not found any solution\n")
+
+print(maze.spawn)
+print(maze.end)
+
+print("Best-First Search:")
+start_time = time.time()
+best_first_solution = best_first(maze)
+
+if best_first_solution != None:
+    print(best_first_solution)
+    print("--- %s seconds ---\n" % (time.time() - start_time))
+else:
+    print("Has not found any solution\n")
+
+print("A star:")
+start_time = time.time()
+a_star_solution = a_star(maze)
+
+if a_star_solution != None:
+    print(a_star_solution)
+    print("--- %s seconds ---\n" % (time.time() - start_time))
+else:
+    print("Has not found any solution\n")
+
+# print("Hill Climbing:")
+# start_time = time.time()
+# hill_climbing_solution = hill_climbing(maze)
+
+# if hill_climbing_solution != None:
+#     print(hill_climbing_solution)
+#     print("--- %s seconds ---" % (time.time() - start_time))
+# else:
+#     print("Has not found any solution")
