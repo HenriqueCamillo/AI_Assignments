@@ -58,71 +58,67 @@ def bfs_traceback(maze, parents):
     return path
 
 # Fills te previous_access_matrix while doing the actual DFS
-def aux_dfs(maze, current_node, previous_access_matrix):
-  # Marks the current node that it is in as already visited
-  maze.board[current_node[0]][current_node[1]] = 'x'
+def aux_dfs(maze, current_node, path):
+    if current_node == maze.end:
+        path.append(current_node)
+        return True
 
-  # Each cell bellow puts the current node on the node that will be acessed when the function calls it
-  # The conditions are that it does not goes out of the matrix and is a valid walk point
+    # Marks the current node that it is in as already visited
+    maze.board[current_node[0]][current_node[1]] = 'x'
 
-  # Walks to the right if the conditions to do so are met
-  if(current_node[1]+1 < maze.shape[1] and (maze.board[current_node[0]][current_node[1]+1] == '*' or maze.board[current_node[0]][current_node[1]+1] == '$')):
-    previous_access_matrix[current_node[0]][current_node[1]+1] = current_node
-    aux_dfs(maze, (current_node[0], current_node[1]+1), previous_access_matrix)
+    # Each cell bellow puts the current node on the node that will be acessed when the function calls it
+    # The conditions are that it does not goes out of the matrix and is a valid walk point
+
+    # Walks to the right if the conditions to do so are met
+    if(current_node[1]+1 < maze.shape[1] and (maze.board[current_node[0]][current_node[1]+1] == '*' or maze.board[current_node[0]][current_node[1]+1] == '$')):
+        if aux_dfs(maze, (current_node[0], current_node[1]+1), path):
+            maze.board[current_node[0]][current_node[1]] = 'O'
+            path.append(current_node)
+            return True
   
   # Walks to the bottom if the conditions to do so are met
-  if(current_node[0]+1 < maze.shape[0] and (maze.board[current_node[0]+1][current_node[1]] == '*' or maze.board[current_node[0]+1][current_node[1]] == '$')):
-    previous_access_matrix[current_node[0]+1][current_node[1]] = current_node
-    aux_dfs(maze, (current_node[0]+1, current_node[1]), previous_access_matrix)
+    if(current_node[0]+1 < maze.shape[0] and (maze.board[current_node[0]+1][current_node[1]] == '*' or maze.board[current_node[0]+1][current_node[1]] == '$')):
+        if aux_dfs(maze, (current_node[0]+1, current_node[1]), path):
+            maze.board[current_node[0]][current_node[1]] = 'O'
+            path.append(current_node)
+            return True
 
-  # Walks to the left if the conditions to do so are met
-  if(current_node[1]-1 > 0 and (maze.board[current_node[0]][current_node[1]-1] == '*' or maze.board[current_node[0]][current_node[1]-1] == '$')):
-    previous_access_matrix[current_node[0]][current_node[1]-1] = current_node
-    aux_dfs(maze, (current_node[0], current_node[1]-1), previous_access_matrix)
+    # Walks to the left if the conditions to do so are met
+    if(current_node[1]-1 > 0 and (maze.board[current_node[0]][current_node[1]-1] == '*' or maze.board[current_node[0]][current_node[1]-1] == '$')):
+        if aux_dfs(maze, (current_node[0], current_node[1]-1), path):
+            maze.board[current_node[0]][current_node[1]] = 'O'
+            path.append(current_node)
+            return True
 
-  # Walks to the top if the conditions to do so are met
-  if(current_node[0]-1 > 0 and (maze.board[current_node[0]-1][current_node[1]] == '*' or maze.board[current_node[0]-1][current_node[1]] == '$')):
-    previous_access_matrix[current_node[0]-1][current_node[1]] = current_node
-    aux_dfs(maze, (current_node[0]-1, current_node[1]), previous_access_matrix)
+    # Walks to the top if the conditions to do so are met
+    if(current_node[0]-1 > 0 and (maze.board[current_node[0]-1][current_node[1]] == '*' or maze.board[current_node[0]-1][current_node[1]] == '$')):
+        if aux_dfs(maze, (current_node[0]-1, current_node[1]), path):
+            maze.board[current_node[0]][current_node[1]] = 'O'
+            path.append(current_node)
+            return True
 
-# Recover the inverted list of the path from the matrix
-def dfs_recover_inverted_path(previous_access_matrix, begin, end):
-  current = end
-  path = []
-    
-  # Checks if the solution exists
-  if(previous_access_matrix[end[0]][end[1]] != None):
-    # Stores the end point
-    path.append(current)
-
-    # Retrieves the path from the end to the begin appending it to the path array
-    while current != begin:
-      #adds a node to the list path
-      path.append(previous_access_matrix[current[0]][current[1]])
-      current = previous_access_matrix[current[0]][current[1]]
-
-  # Returns the inverted list
-  return path
+    return False
 
 # Finds the path while recovering an matrix that has in each of the nodes the previous node from wich the current was accessed
 # that was generated while doin the DFS
 def dfs(original_maze):
-  # Creates a copy of the original maze
-  maze = copy.deepcopy(original_maze)
+    # Creates a copy of the original maze
+    maze = copy.deepcopy(original_maze)
 
-  # Creates an auxiliar matrix that stores the node from where the current node was accessed from
-  previous_access_matrix = [[None for _ in range(y)] for _ in range(x)]
-  
-  # Fills te previous_access_matrix while doing the actual DFS
-  aux_dfs(maze, maze.spawn, previous_access_matrix)
+    # Creates an auxiliar matrix that stores the node from where the current node was accessed from
+    previous_access_matrix = [[None for _ in range(y)] for _ in range(x)]
 
-  # Recover the inverted path from the previous_access_matrix
-  path = dfs_recover_inverted_path(previous_access_matrix, maze.spawn, maze.end)
+    # Fills te previous_access_matrix while doing the actual DFS
+    path = []
+    aux_dfs(maze, maze.spawn, path)
 
-  # Inverts the inverted path, correcting it
-  path = path[::-1]
+    # Recover the inverted path from the previous_access_matrix
+    # path = dfs_recover_inverted_path(previous_access_matrix, maze.spawn, maze.end)
 
-  return path if len(path) > 0 else None
+    # Inverts the inverted path, correcting it
+    path = path[::-1]
+
+    return path if len(path) > 0 else None
 
 # Class that represents a node
 class Node:
