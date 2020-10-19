@@ -90,11 +90,11 @@ def dfs_recover_inverted_path(previous_access_matrix, begin, end):
   current = end
   path = []
     
-  # Stores the end point
-  path.append(current[0]][current[1])
-  
   # Checks if the solution exists
   if(previous_access_matrix[end[0]][end[1]] != None):
+    # Stores the end point
+    path.append(current)
+
     # Retrieves the path from the end to the begin appending it to the path array
     while current != begin:
       #adds a node to the list path
@@ -122,7 +122,7 @@ def dfs(original_maze):
   # Inverts the inverted path, correcting it
   path = path[::-1]
 
-  return path
+  return path if len(path) > 0 else None
 
 # Class that represents a node
 class Node:
@@ -309,9 +309,6 @@ if dfs_solution != None:
     print("--- %s seconds ---\n" % (time.time() - start_time))
 else:
     print("Has not found any solution\n")
-
-print(maze.spawn)
-print(maze.end)
 
 print("Best-First Search:")
 start_time = time.time()
