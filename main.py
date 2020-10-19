@@ -118,7 +118,7 @@ def dfs(original_maze):
   # Inverts the inverted path, correcting it
   path = path[::-1]
 
-  return path
+  original_maze.solution = path
 
 # Class that represents a node
 class Node:
@@ -282,13 +282,14 @@ for i in range(x):
         maze.board[i][j] = line[j]
 
 
-# bfs(maze)
-# dfs(maze)
 start_time = time.time()
-best_first(maze)
-print("Best-First Search:")
-print(maze.solution[::-1])
-print("--- %s seconds ---" % (time.time() - start_time))
+# bfs(maze)
+# print("DFS Search:")
+# dfs(maze)
+# print(maze.solution)
+# print("--- %s seconds ---" % (time.time() - start_time))
+# best_first(maze)
+# print("Best-First Search:")
 # start_time = time.time()
 # a_star(maze)
 # print("A star:")
