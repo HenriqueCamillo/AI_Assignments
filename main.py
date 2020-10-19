@@ -92,10 +92,11 @@ def aux_dfs(maze, current_node, previous_access_matrix):
 def dfs_recover_inverted_path(previous_access_matrix, begin, end):
   current = end
   path = []
-  while current != begin:
-    #adds a node to the list path
-    path.append(previous_access_matrix[current[0]][current[1]])
-    current = previous_access_matrix[current[0]][current[1]]
+  if(previous_access_matrix[end[0]][end[1]] != None):
+    while current != begin:
+      #adds a node to the list path
+      path.append(previous_access_matrix[current[0]][current[1]])
+      current = previous_access_matrix[current[0]][current[1]]
 
   # Returns the inverted list
   return path
