@@ -371,6 +371,7 @@ start_time = time.time()
 solution = bfs(bfs_maze)
 print(bfs_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s steps ---" % len(bfs_maze.solution))
 
 if solution == None:
     print("Has not found any solution")
@@ -385,6 +386,7 @@ start_time = time.time()
 solution = dfs(dfs_maze)
 print(dfs_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s steps ---" % len(dfs_maze.solution))
 
 if solution == None:
     print("Has not found any solution")
@@ -399,6 +401,8 @@ start_time = time.time()
 solution = best_first(best_first_maze, 'manhattan')
 print(best_first_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s steps ---" % len(best_first_maze.solution))
+
 
 if solution == None:
     print("Has not found any solution")
@@ -412,6 +416,7 @@ start_time = time.time()
 solution = best_first(best_first_maze_euclidean,"euclidean")
 print(best_first_maze_euclidean.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s steps ---" % len(best_first_maze_euclidean.solution))
 
 if solution == None:
     print("Has not found any solution")
@@ -426,6 +431,7 @@ start_time = time.time()
 solution = a_star(a_start_maze, 'manhattan')
 print(a_start_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s steps ---" % len(a_start_maze.solution))
 
 if solution == None:
     print("Has not found any solution")
@@ -439,6 +445,7 @@ start_time = time.time()
 solution = a_star(a_start_maze_euclidean, 'euclidean')
 print(a_start_maze_euclidean.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s steps ---" % len(a_start_maze_euclidean.solution))
 
 if solution == None:
     print("Has not found any solution")
@@ -452,6 +459,7 @@ start_time = time.time()
 solution = hill_climbing(hill_climbing_maze)
 print(hill_climbing_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s steps ---" % len(hill_climbing_maze.solution))
 
 if solution == None:
     print("Has not found any solution")
