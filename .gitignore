@@ -1,1 +1,8 @@
 *.in
+a_star_euclidean.txt
+a_star_manhattan.txt
+best_first_euclidean.txt
+best_first_manhattan.txt
+bfs.txt
+dfs.txt
+hill_climbing.txt
