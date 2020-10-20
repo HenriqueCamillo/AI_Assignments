@@ -153,13 +153,7 @@ def euclidean(current, end):
             ((current.position[1] - end.position[1]) ** 2))
 
 #Best First Search
-<<<<<<< HEAD
-def best_first(maze):
-=======
-def best_first(original_maze, heuristic):
-    maze = copy.deepcopy(original_maze)
-
->>>>>>> origin/gyovana
+def best_first(maze, heuristic):
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
     # initialize end node
@@ -186,6 +180,7 @@ def best_first(original_maze, heuristic):
         if current_node == end_node:
             while current_node != start_node:
                 maze.solution.insert(0, current_node.position)
+                maze.board[current_node.position[0]][current_node.position[1]] = 'O'
                 current_node = current_node.parent
             maze.solution.insert(0, current_node.position)
             
@@ -217,13 +212,7 @@ def best_first(original_maze, heuristic):
     return None
 
 #A star search        
-<<<<<<< HEAD
-def a_star(maze):
-=======
-def a_star(original_maze, heuristic):
-    maze = copy.deepcopy(original_maze)
-
->>>>>>> origin/gyovana
+def a_star(maze, heuristic):
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
     # initialize end node
@@ -374,6 +363,7 @@ for i in range(x):
         maze.board[i][j] = line[j]
 
 
+# BFS
 print("BFS Search:")
 bfs_maze = copy.deepcopy(maze)
 start_time = time.time()
@@ -387,6 +377,7 @@ if solution == None:
     
 bfs_maze.print('bfs.txt')
 
+# DFS
 print("\nDFS Search:")
 dfs_maze = copy.deepcopy(maze)
 start_time = time.time()
@@ -399,31 +390,61 @@ if solution == None:
     print("Has not found any solution")
 dfs_maze.print('dfs.txt')
 
-print("\nBest-First Search:")
+# Best First
+    # Manhattan
+print("\nBest-First Search (manhattan):")
 best_first_maze = copy.deepcopy(maze)
 start_time = time.time()
-solution = best_first(maze,"euclidean")
 
-solution = best_first(best_first_maze)
+solution = best_first(best_first_maze, 'manhattan')
 print(best_first_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
 
 if solution == None:
     print("Has not found any solution")
-best_first_maze.print('best_first.txt')
+best_first_maze.print('best_first_manhattan.txt')
 
-print("\nA star:")
+    # Euclidean
+print("\nBest-First Search (euclidean):")
+best_first_maze_euclidean = copy.deepcopy(maze)
+start_time = time.time()
+
+solution = best_first(best_first_maze_euclidean,"euclidean")
+print(best_first_maze_euclidean.solution)
+print("--- %s seconds ---" % (time.time() - start_time))
+
+if solution == None:
+    print("Has not found any solution")
+best_first_maze_euclidean.print('best_first_euclidean.txt')
+
+# A Star
+    # Manhattan
+print("\nA star (manhattan):")
 a_start_maze = copy.deepcopy(maze)
 start_time = time.time()
 
-solution = a_star(a_start_maze)
+solution = a_star(a_start_maze, 'manhattan')
 print(a_start_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
 
 if solution == None:
     print("Has not found any solution")
-a_start_maze.print('a_star.txt')
+a_start_maze.print('a_star_manhattan.txt')
 
+    # Euclidean
+print("\nA star (euclidean):")
+a_start_maze_euclidean = copy.deepcopy(maze)
+start_time = time.time()
+
+solution = a_star(a_start_maze_euclidean, 'euclidean')
+print(a_start_maze_euclidean.solution)
+print("--- %s seconds ---" % (time.time() - start_time))
+
+if solution == None:
+    print("Has not found any solution")
+a_start_maze.print('a_star_euclidean.txt')
+
+# Hill Climbing
 print("\nHill Climbing:")
 hill_climbing_maze = copy.deepcopy(maze)
 start_time = time.time()
