@@ -44,6 +44,7 @@ def bfs(maze):
             # If has reached the end, discovers tracback and returns
             if move == maze.end:
                 maze.solution = bfs_traceback(maze, parents)
+                maze.board[maze.spawn[0]][maze.spawn[1]] = '#'
                 return maze.solution
             # If hasn't reached the end yet, marks the node as visited and add it to the queue
             else:
@@ -336,9 +337,7 @@ class Maze:
         file.write(str(self.shape[0]) + ' ' + str(self.shape[1]) + '\n')
         for i in range(len(self.board)):
             for j in range(len(self.board[0])):
-                print(self.board[i][j], end=' ')
-                file.write(str(self.board[i][j]) + ' ')
-            print()
+                file.write(str(self.board[i][j]))
             file.write('\n')
         file.close()
         os.system('python3 path_to_img.py ' + filename + '.txt ' + filename + '.bmp')

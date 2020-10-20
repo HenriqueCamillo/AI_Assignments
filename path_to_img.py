@@ -2,6 +2,7 @@ import sys
 import imageio
 import numpy as np
 
+# Transforms the input from the file into a matrix
 def file_load(filename):
     
     try:
@@ -25,17 +26,18 @@ def file_load(filename):
 
     return maze
 
+# Converts each character into a color
 def img_converter(maze):
 
     img = np.zeros((len(maze), len(maze[0]), 3))
 
     color = {
-        '*': [255, 214, 191],
-        '-': [48, 18, 45],
-        'x': [135, 7, 52],
-        'o': [203, 45, 62],
-        '#': [77, 8, 42],
-        '$': [239, 71, 58]
+        '*': [255, 214, 191],   # Empty space
+        '-': [48, 18, 45],      # Wall
+        'x': [63, 127, 191],    # Explored space
+        'O': [203, 45, 62],     # Chosen path
+        '#': [77, 8, 42],       # Entrance
+        '$': [239, 71, 58]      # Exit
     }
 
     for x in range(0, img.shape[0]):
