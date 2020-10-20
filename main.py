@@ -449,7 +449,7 @@ print("--- %s steps ---" % len(a_start_maze_euclidean.solution))
 
 if solution == None:
     print("Has not found any solution")
-a_start_maze.print('a_star_euclidean')
+a_start_maze_euclidean.print('a_star_euclidean')
 
 # Hill Climbing
 print("\nHill Climbing:")
