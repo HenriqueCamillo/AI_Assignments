@@ -332,7 +332,7 @@ class Maze:
         self.cost = 1
 
     def print(self, filename):
-        file = open(filename, 'w')
+        file = open(filename + '.txt', 'w')
         file.write(str(self.shape[0]) + ' ' + str(self.shape[1]) + '\n')
         for i in range(len(self.board)):
             for j in range(len(self.board[0])):
@@ -341,6 +341,7 @@ class Maze:
             print()
             file.write('\n')
         file.close()
+        os.system('python3 path_to_img.py < ' + filename + '.txt ' + filename + '.bmp')
 
 
 #===================================#
@@ -375,7 +376,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 if solution == None:
     print("Has not found any solution")
     
-bfs_maze.print('bfs.txt')
+bfs_maze.print('bfs')
 
 # DFS
 print("\nDFS Search:")
@@ -388,7 +389,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 if solution == None:
     print("Has not found any solution")
-dfs_maze.print('dfs.txt')
+dfs_maze.print('dfs')
 
 # Best First
     # Manhattan
@@ -402,7 +403,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 if solution == None:
     print("Has not found any solution")
-best_first_maze.print('best_first_manhattan.txt')
+best_first_maze.print('best_first_manhattan')
 
     # Euclidean
 print("\nBest-First Search (euclidean):")
@@ -415,7 +416,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 if solution == None:
     print("Has not found any solution")
-best_first_maze_euclidean.print('best_first_euclidean.txt')
+best_first_maze_euclidean.print('best_first_euclidean')
 
 # A Star
     # Manhattan
@@ -429,7 +430,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 if solution == None:
     print("Has not found any solution")
-a_start_maze.print('a_star_manhattan.txt')
+a_start_maze.print('a_star_manhattan')
 
     # Euclidean
 print("\nA star (euclidean):")
@@ -442,7 +443,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 if solution == None:
     print("Has not found any solution")
-a_start_maze.print('a_star_euclidean.txt')
+a_start_maze.print('a_star_euclidean')
 
 # Hill Climbing
 print("\nHill Climbing:")
@@ -455,4 +456,4 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 if solution == None:
     print("Has not found any solution")
-hill_climbing_maze.print('hill_climbing.txt')
+hill_climbing_maze.print('hill_climbing')
