@@ -1,3 +1,4 @@
+import os
 import time
 import copy
 import random
@@ -26,10 +27,7 @@ def restore_spawn_and_end(maze):
 
 # Finds maze solution using Breadth First Search algorithm
 # Returns the solution, or None, if the maze doesn't have any
-def bfs(original_maze):
-
-    # Creates a copy of the original maze
-    maze = copy.deepcopy(original_maze)
+def bfs(maze):
     queue = [maze.spawn]    # BFS queue, starting on maze spawn
     parents = {}            # Stores the parent of each node, so that we can find the path
 
@@ -45,21 +43,13 @@ def bfs(original_maze):
 
             # If has reached the end, discovers tracback and returns
             if move == maze.end:
-                original_maze.bfs_solution = bfs_traceback(maze, parents)
-
-                # prints result
-                restore_spawn_and_end(maze)
-                maze.print('bfs.txt')
-
-                return original_maze.bfs_solution
+                maze.solution = bfs_traceback(maze, parents)
+                return maze.solution
             # If hasn't reached the end yet, marks the node as visited and add it to the queue
             else:
                 maze.board[move[0]][move[1]] = 'x'
                 queue.append(move)
 
-    # prints result
-    restore_spawn_and_end(maze)
-    maze.print('bfs.txt')
     return None
 
 # Finds the path of the solution after it was found and the parent of each node was set
@@ -116,10 +106,7 @@ def aux_dfs(maze, current_node, path):
 
 # Finds the path while recovering an matrix that has in each of the nodes the previous node from wich the current was accessed
 # that was generated while doin the DFS
-def dfs(original_maze):
-    # Creates a copy of the original maze
-    maze = copy.deepcopy(original_maze)
-
+def dfs(maze):
     # Creates an auxiliar matrix that stores the node from where the current node was accessed from
     previous_access_matrix = [[None for _ in range(y)] for _ in range(x)]
 
@@ -132,10 +119,9 @@ def dfs(original_maze):
 
     # Inverts the inverted path, correcting it
     path = path[::-1]
-    original_maze.dfs_solution = path
+    maze.solution = path
 
     restore_spawn_and_end(maze)
-    maze.print('dfs.txt')
 
     return path if len(path) > 0 else None
 
@@ -162,9 +148,7 @@ def heuristic(current, end):
     return ((abs(current.position[0] - end.position[0])) + (abs(current.position[1] - end.position[1])))
 
 #Best First Search
-def best_first(original_maze):
-    maze = copy.deepcopy(original_maze)
-
+def best_first(maze):
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
     # initialize end node
@@ -190,15 +174,12 @@ def best_first(original_maze):
         #If reached the goal, return the path solution
         if current_node == end_node:
             while current_node != start_node:
-                original_maze.best_first_solution.insert(0, current_node.position)
+                maze.solution.insert(0, current_node.position)
                 current_node = current_node.parent
-            original_maze.best_first_solution.insert(0, current_node.position)
+            maze.solution.insert(0, current_node.position)
             
-            # prints result
             restore_spawn_and_end(maze)
-            maze.print('best_first.txt')
-
-            return maze.best_first_solution
+            return maze.solution
 
         moves = get_valid_moves(maze.board,current_node.position)
         
@@ -218,15 +199,11 @@ def best_first(original_maze):
                 yet_to_visit.append(neighbor)
 
     restore_spawn_and_end(maze)
-    maze.print('best_first.txt')
-
     # return None if path is not found
     return None
 
 #A star search        
-def a_star(original_maze):
-    maze = copy.deepcopy(original_maze)
-
+def a_star(maze):
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
     # initialize end node
@@ -252,15 +229,14 @@ def a_star(original_maze):
         #If reached the goal, return the path solution
         if current_node == end_node:
             while current_node != start_node:
-                original_maze.a_star_solution.insert(0, current_node.position)
+                maze.solution.insert(0, current_node.position)
+                maze.board[current_node.position[0]][current_node.position[1]] = 'O'
                 current_node = current_node.parent
-            original_maze.a_star_solution.insert(0, current_node.position)
+            maze.solution.insert(0, current_node.position)
 
             # prints result
             restore_spawn_and_end(maze)
-            maze.print('a_start.txt')
-
-            return original_maze.a_star_solution
+            return maze.solution
 
         moves = get_valid_moves(maze.board, current_node.position)
         
@@ -283,8 +259,6 @@ def a_star(original_maze):
 
     # prints result
     restore_spawn_and_end(maze)
-    maze.print('a_star.txt')
-
     # return None if path is not found
     return None
 
@@ -292,10 +266,7 @@ def a_star(original_maze):
 def hc_heuristic(current, end):
     return ((abs(current[0] - end[0])) + (abs(current[1] - end[1])))
 
-def hill_climbing(original_maze):
-    # Creates a copy of the original maze
-    maze = copy.deepcopy(original_maze)
-
+def hill_climbing(maze):
     # Sets initial position
     cur_pos = maze.spawn
     prev_pos = None
@@ -307,7 +278,8 @@ def hill_climbing(original_maze):
     while moves:
         # If our hill climber has moved, add to solution
         if cur_pos != prev_pos:
-            original_maze.hill_climbing_solution.append(cur_pos)
+            maze.solution.append(cur_pos)
+            maze.board[cur_pos[0]][cur_pos[1]] = 'O'
 
         # Stochastic hill climbing
         # We figured this would be the best for a simple maze because no direction is always better than another for any maze
@@ -317,13 +289,10 @@ def hill_climbing(original_maze):
 
         # Stop movement if we reach the end
         if move == maze.end:
-            original_maze.hill_climbing_solution.append(move)
+            maze.solution.append(move)
             
-            # Prints result
             restore_spawn_and_end(maze)
-            maze.print('hill_climbing.txt')
-
-            return original_maze.hill_climbing_solution
+            return maze.solution
         else:
             prev_pos = cur_pos
 
@@ -337,9 +306,7 @@ def hill_climbing(original_maze):
             # Get new valid moves
             moves = get_valid_moves(maze.board, cur_pos)
 
-    # Prints result
     restore_spawn_and_end(maze)
-    maze.print('hill_climbing.txt')
     # If we can't reach the end
     return None
        
@@ -349,11 +316,7 @@ class Maze:
         self.board = [[None for _ in range(y)] for _ in range(x)]
         self.spawn = ()
         self.end = ()
-        self.bfs_solution = []
-        self.dfs_solution = []
-        self.best_first_solution = []
-        self.a_star_solution = []
-        self.hill_climbing_solution = []
+        self.solution = []
         self.cost = 1
 
     def print(self, filename):
@@ -389,47 +352,62 @@ for i in range(x):
 
 
 print("BFS Search:")
+bfs_maze = copy.deepcopy(maze)
 start_time = time.time()
-solution = bfs(maze)
 
-print(maze.bfs_solution)
+solution = bfs(bfs_maze)
+print(bfs_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+
 if solution == None:
     print("Has not found any solution")
     
+bfs_maze.print('bfs.txt')
 
 print("\nDFS Search:")
+dfs_maze = copy.deepcopy(maze)
 start_time = time.time()
-solution = dfs(maze)
 
-print(maze.dfs_solution)
+solution = dfs(dfs_maze)
+print(dfs_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+
 if solution == None:
     print("Has not found any solution")
+dfs_maze.print('dfs.txt')
 
 print("\nBest-First Search:")
+best_first_maze = copy.deepcopy(maze)
 start_time = time.time()
-solution = best_first(maze)
 
-print(maze.best_first_solution)
+solution = best_first(best_first_maze)
+print(best_first_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+
 if solution == None:
     print("Has not found any solution")
+best_first_maze.print('best_first.txt')
 
 print("\nA star:")
+a_start_maze = copy.deepcopy(maze)
 start_time = time.time()
-solution = a_star(maze)
 
-print(maze.a_star_solution)
+solution = a_star(a_start_maze)
+print(a_start_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+
 if solution == None:
     print("Has not found any solution")
+a_start_maze.print('a_star.txt')
 
 print("\nHill Climbing:")
+hill_climbing_maze = copy.deepcopy(maze)
 start_time = time.time()
-solution = hill_climbing(maze)
 
-print(maze.hill_climbing_solution)
+solution = hill_climbing(hill_climbing_maze)
+print(hill_climbing_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+
 if solution == None:
     print("Has not found any solution")
+hill_climbing_maze.print('hill_climbing.txt')
