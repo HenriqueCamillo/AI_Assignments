@@ -1,3 +1,9 @@
+# Grupo:
+#  Nome: Abner Eduardo Silveira Santos  NUSP: 10692012
+#  Nome: Gyovana Mayara Moriyama        NUSP: 10734387
+#  Nome: Henrique Matarazo Camillo      NUSP: 10294943
+#  Nome: João Pedro Uchôa Cavalcante    NUSP: 10801169
+
 import sys
 import imageio
 import numpy as np
