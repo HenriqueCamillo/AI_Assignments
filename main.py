@@ -1,3 +1,4 @@
+import os
 import time
 import copy
 import random
@@ -20,11 +21,13 @@ def get_valid_moves(board, pos):
 
     return moves
 
+def restore_spawn_and_end(maze):
+    maze.board[maze.spawn[0]][maze.spawn[1]] = '#'
+    maze.board[maze.end[0]][maze.end[1]] = '$'
+
 # Finds maze solution using Breadth First Search algorithm
 # Returns the solution, or None, if the maze doesn't have any
-def bfs(original_maze):
-    # Creates a copy of the original maze
-    maze = copy.deepcopy(original_maze)
+def bfs(maze):
     queue = [maze.spawn]    # BFS queue, starting on maze spawn
     parents = {}            # Stores the parent of each node, so that we can find the path
 
@@ -40,8 +43,8 @@ def bfs(original_maze):
 
             # If has reached the end, discovers tracback and returns
             if move == maze.end:
-                original_maze.bfs_solution = bfs_traceback(maze, parents)
-                return original_maze.bfs_solution
+                maze.solution = bfs_traceback(maze, parents)
+                return maze.solution
             # If hasn't reached the end yet, marks the node as visited and add it to the queue
             else:
                 maze.board[move[0]][move[1]] = 'x'
@@ -103,10 +106,7 @@ def aux_dfs(maze, current_node, path):
 
 # Finds the path while recovering an matrix that has in each of the nodes the previous node from wich the current was accessed
 # that was generated while doin the DFS
-def dfs(original_maze):
-    # Creates a copy of the original maze
-    maze = copy.deepcopy(original_maze)
-
+def dfs(maze):
     # Creates an auxiliar matrix that stores the node from where the current node was accessed from
     previous_access_matrix = [[None for _ in range(y)] for _ in range(x)]
 
@@ -119,7 +119,9 @@ def dfs(original_maze):
 
     # Inverts the inverted path, correcting it
     path = path[::-1]
-    original_maze.dfs_solution = path
+    maze.solution = path
+
+    restore_spawn_and_end(maze)
 
     return path if len(path) > 0 else None
 
@@ -141,12 +143,17 @@ class Node:
         return self.f < other.f
 
 
-#Manhattan distance used in A* heuristic
-def heuristic(current, end):
+#Manhattan distance used in A* and Best-First
+def manhattan(current, end):
     return ((abs(current.position[0] - end.position[0])) + (abs(current.position[1] - end.position[1])))
 
+#Euclidean distance used in A* and Best-First
+def euclidean(current, end):
+    return (((current.position[0] - end.position[0]) ** 2) +
+            ((current.position[1] - end.position[1]) ** 2))
+
 #Best First Search
-def best_first(maze):
+def best_first(maze, heuristic):
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
     # initialize end node
@@ -167,15 +174,18 @@ def best_first(maze):
 
         #Mark current node as visited
         visited.append(current_node)
+        maze.board[current_node.position[0]][current_node.position[1]] = 'x'
 
         #If reached the goal, return the path solution
         if current_node == end_node:
             while current_node != start_node:
-                maze.best_first_solution.insert(0, current_node.position)
+                maze.solution.insert(0, current_node.position)
+                maze.board[current_node.position[0]][current_node.position[1]] = 'O'
                 current_node = current_node.parent
-            maze.best_first_solution.insert(0, current_node.position)
-
-            return maze.best_first_solution
+            maze.solution.insert(0, current_node.position)
+            
+            restore_spawn_and_end(maze)
+            return maze.solution
 
         moves = get_valid_moves(maze.board,current_node.position)
         
@@ -187,18 +197,22 @@ def best_first(maze):
                 continue
             
             #Create f value according to heuristic
-            neighbor.f = heuristic(neighbor, end_node)
+            if heuristic == "manhattan":
+                neighbor.f = manhattan(neighbor, end_node)
+            elif heuristic == "euclidean":
+                neighbor.f = euclidean(neighbor, end_node)
 
             #Check if neighbor is in yet_to_visit list and if it has a lower f value,
             # if not, add to yet_to_visit list
             if len([i for i in yet_to_visit if neighbor == i and neighbor.f >= i.f]) <= 0:
                 yet_to_visit.append(neighbor)
 
+    restore_spawn_and_end(maze)
     # return None if path is not found
     return None
 
 #A star search        
-def a_star(maze):
+def a_star(maze, heuristic):
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
     # initialize end node
@@ -219,15 +233,19 @@ def a_star(maze):
 
         #Mark current node as visited
         visited.append(current_node)
+        maze.board[current_node.position[0]][current_node.position[1]] = 'x'
 
         #If reached the goal, return the path solution
         if current_node == end_node:
             while current_node != start_node:
-                maze.a_star_solution.insert(0, current_node.position)
+                maze.solution.insert(0, current_node.position)
+                maze.board[current_node.position[0]][current_node.position[1]] = 'O'
                 current_node = current_node.parent
-            maze.a_star_solution.insert(0, current_node.position)
+            maze.solution.insert(0, current_node.position)
 
-            return maze.a_star_solution
+            # prints result
+            restore_spawn_and_end(maze)
+            return maze.solution
 
         moves = get_valid_moves(maze.board, current_node.position)
         
@@ -240,7 +258,10 @@ def a_star(maze):
             
             #Create f,g and h values
             neighbor.g = current_node.g + maze.cost
-            neighbor.h = heuristic(neighbor, end_node)
+            if heuristic == "manhattan":
+                neighbor.h = manhattan(neighbor, end_node)
+            elif heuristic == "euclidean":
+                neighbor.h = euclidean(neighbor, end_node)
             neighbor.f = neighbor.g + neighbor.h
 
             #Check if neighbor is in yet_to_visit list and if it has a lower f value,
@@ -248,6 +269,8 @@ def a_star(maze):
             if len([i for i in yet_to_visit if neighbor == i and neighbor.f >= i.f]) <= 0:
                 yet_to_visit.append(neighbor)
 
+    # prints result
+    restore_spawn_and_end(maze)
     # return None if path is not found
     return None
 
@@ -255,10 +278,7 @@ def a_star(maze):
 def hc_heuristic(current, end):
     return ((abs(current[0] - end[0])) + (abs(current[1] - end[1])))
 
-def hill_climbing(original_maze):
-    # Creates a copy of the original maze
-    maze = copy.deepcopy(original_maze)
-
+def hill_climbing(maze):
     # Sets initial position
     cur_pos = maze.spawn
     prev_pos = None
@@ -270,7 +290,8 @@ def hill_climbing(original_maze):
     while moves:
         # If our hill climber has moved, add to solution
         if cur_pos != prev_pos:
-            original_maze.hill_climbing_solution.append(cur_pos)
+            maze.solution.append(cur_pos)
+            maze.board[cur_pos[0]][cur_pos[1]] = 'O'
 
         # Stochastic hill climbing
         # We figured this would be the best for a simple maze because no direction is always better than another for any maze
@@ -280,8 +301,10 @@ def hill_climbing(original_maze):
 
         # Stop movement if we reach the end
         if move == maze.end:
-            original_maze.hill_climbing_solution.append(move)
-            return original_maze.hill_climbing_solution
+            maze.solution.append(move)
+            
+            restore_spawn_and_end(maze)
+            return maze.solution
         else:
             prev_pos = cur_pos
 
@@ -295,6 +318,7 @@ def hill_climbing(original_maze):
             # Get new valid moves
             moves = get_valid_moves(maze.board, cur_pos)
 
+    restore_spawn_and_end(maze)
     # If we can't reach the end
     return None
        
@@ -304,18 +328,21 @@ class Maze:
         self.board = [[None for _ in range(y)] for _ in range(x)]
         self.spawn = ()
         self.end = ()
-        self.bfs_solution = []
-        self.dfs_solution = []
-        self.best_first_solution = []
-        self.a_star_solution = []
-        self.hill_climbing_solution = []
+        self.solution = []
         self.cost = 1
 
-    def print(self):
+    def print(self, filename):
+        file = open(filename + '.txt', 'w')
+        file.write(str(self.shape[0]) + ' ' + str(self.shape[1]) + '\n')
         for i in range(len(self.board)):
             for j in range(len(self.board[0])):
                 print(self.board[i][j], end=' ')
+                file.write(str(self.board[i][j]) + ' ')
             print()
+            file.write('\n')
+        file.close()
+        os.system('python3 path_to_img.py ' + filename + '.txt ' + filename + '.bmp')
+
 
 #===================================#
 
@@ -337,48 +364,96 @@ for i in range(x):
         maze.board[i][j] = line[j]
 
 
+# BFS
 print("BFS Search:")
+bfs_maze = copy.deepcopy(maze)
 start_time = time.time()
-solution = bfs(maze)
 
-print(maze.bfs_solution)
+solution = bfs(bfs_maze)
+print(bfs_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+
 if solution == None:
     print("Has not found any solution")
     
+bfs_maze.print('bfs')
 
+# DFS
 print("\nDFS Search:")
+dfs_maze = copy.deepcopy(maze)
 start_time = time.time()
-solution = dfs(maze)
 
-print(maze.dfs_solution)
+solution = dfs(dfs_maze)
+print(dfs_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+
 if solution == None:
     print("Has not found any solution")
+dfs_maze.print('dfs')
 
-print("\nBest-First Search:")
+# Best First
+    # Manhattan
+print("\nBest-First Search (manhattan):")
+best_first_maze = copy.deepcopy(maze)
 start_time = time.time()
-solution = best_first(maze)
 
-print(maze.best_first_solution)
+solution = best_first(best_first_maze, 'manhattan')
+print(best_first_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+
 if solution == None:
     print("Has not found any solution")
+best_first_maze.print('best_first_manhattan')
 
-print("\nA star:")
+    # Euclidean
+print("\nBest-First Search (euclidean):")
+best_first_maze_euclidean = copy.deepcopy(maze)
 start_time = time.time()
-solution = a_star(maze)
 
-print(maze.a_star_solution)
+solution = best_first(best_first_maze_euclidean,"euclidean")
+print(best_first_maze_euclidean.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+
 if solution == None:
     print("Has not found any solution")
+best_first_maze_euclidean.print('best_first_euclidean')
 
+# A Star
+    # Manhattan
+print("\nA star (manhattan):")
+a_start_maze = copy.deepcopy(maze)
+start_time = time.time()
+
+solution = a_star(a_start_maze, 'manhattan')
+print(a_start_maze.solution)
+print("--- %s seconds ---" % (time.time() - start_time))
+
+if solution == None:
+    print("Has not found any solution")
+a_start_maze.print('a_star_manhattan')
+
+    # Euclidean
+print("\nA star (euclidean):")
+a_start_maze_euclidean = copy.deepcopy(maze)
+start_time = time.time()
+
+solution = a_star(a_start_maze_euclidean, 'euclidean')
+print(a_start_maze_euclidean.solution)
+print("--- %s seconds ---" % (time.time() - start_time))
+
+if solution == None:
+    print("Has not found any solution")
+a_start_maze.print('a_star_euclidean')
+
+# Hill Climbing
 print("\nHill Climbing:")
+hill_climbing_maze = copy.deepcopy(maze)
 start_time = time.time()
-solution = hill_climbing(maze)
 
-print(maze.hill_climbing_solution)
+solution = hill_climbing(hill_climbing_maze)
+print(hill_climbing_maze.solution)
 print("--- %s seconds ---" % (time.time() - start_time))
+
 if solution == None:
     print("Has not found any solution")
+hill_climbing_maze.print('hill_climbing')
