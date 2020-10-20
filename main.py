@@ -89,14 +89,14 @@ def aux_dfs(maze, current_node, path):
             return True
 
     # Walks to the left if the conditions to do so are met
-    if(current_node[1]-1 > 0 and (maze.board[current_node[0]][current_node[1]-1] == '*' or maze.board[current_node[0]][current_node[1]-1] == '$')):
+    if(current_node[1]-1 >= 0 and (maze.board[current_node[0]][current_node[1]-1] == '*' or maze.board[current_node[0]][current_node[1]-1] == '$')):
         if aux_dfs(maze, (current_node[0], current_node[1]-1), path):
             maze.board[current_node[0]][current_node[1]] = 'O'
             path.append(current_node)
             return True
 
     # Walks to the top if the conditions to do so are met
-    if(current_node[0]-1 > 0 and (maze.board[current_node[0]-1][current_node[1]] == '*' or maze.board[current_node[0]-1][current_node[1]] == '$')):
+    if(current_node[0]-1 >= 0 and (maze.board[current_node[0]-1][current_node[1]] == '*' or maze.board[current_node[0]-1][current_node[1]] == '$')):
         if aux_dfs(maze, (current_node[0]-1, current_node[1]), path):
             maze.board[current_node[0]][current_node[1]] = 'O'
             path.append(current_node)
@@ -341,7 +341,7 @@ class Maze:
             print()
             file.write('\n')
         file.close()
-        os.system('python3 path_to_img.py < ' + filename + '.txt ' + filename + '.bmp')
+        os.system('python3 path_to_img.py ' + filename + '.txt ' + filename + '.bmp')
 
 
 #===================================#
