@@ -20,9 +20,14 @@ def get_valid_moves(board, pos):
 
     return moves
 
+def restore_spawn_and_end(maze):
+    maze.board[maze.spawn[0]][maze.spawn[1]] = '#'
+    maze.board[maze.end[0]][maze.end[1]] = '$'
+
 # Finds maze solution using Breadth First Search algorithm
 # Returns the solution, or None, if the maze doesn't have any
 def bfs(original_maze):
+
     # Creates a copy of the original maze
     maze = copy.deepcopy(original_maze)
     queue = [maze.spawn]    # BFS queue, starting on maze spawn
@@ -41,12 +46,20 @@ def bfs(original_maze):
             # If has reached the end, discovers tracback and returns
             if move == maze.end:
                 original_maze.bfs_solution = bfs_traceback(maze, parents)
+
+                # prints result
+                restore_spawn_and_end(maze)
+                maze.print('bfs.txt')
+
                 return original_maze.bfs_solution
             # If hasn't reached the end yet, marks the node as visited and add it to the queue
             else:
                 maze.board[move[0]][move[1]] = 'x'
                 queue.append(move)
 
+    # prints result
+    restore_spawn_and_end(maze)
+    maze.print('bfs.txt')
     return None
 
 # Finds the path of the solution after it was found and the parent of each node was set
@@ -121,6 +134,9 @@ def dfs(original_maze):
     path = path[::-1]
     original_maze.dfs_solution = path
 
+    restore_spawn_and_end(maze)
+    maze.print('dfs.txt')
+
     return path if len(path) > 0 else None
 
 # Class that represents a node
@@ -146,7 +162,9 @@ def heuristic(current, end):
     return ((abs(current.position[0] - end.position[0])) + (abs(current.position[1] - end.position[1])))
 
 #Best First Search
-def best_first(maze):
+def best_first(original_maze):
+    maze = copy.deepcopy(original_maze)
+
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
     # initialize end node
@@ -167,13 +185,18 @@ def best_first(maze):
 
         #Mark current node as visited
         visited.append(current_node)
+        maze.board[current_node.position[0]][current_node.position[1]] = 'x'
 
         #If reached the goal, return the path solution
         if current_node == end_node:
             while current_node != start_node:
-                maze.best_first_solution.insert(0, current_node.position)
+                original_maze.best_first_solution.insert(0, current_node.position)
                 current_node = current_node.parent
-            maze.best_first_solution.insert(0, current_node.position)
+            original_maze.best_first_solution.insert(0, current_node.position)
+            
+            # prints result
+            restore_spawn_and_end(maze)
+            maze.print('best_first.txt')
 
             return maze.best_first_solution
 
@@ -194,11 +217,16 @@ def best_first(maze):
             if len([i for i in yet_to_visit if neighbor == i and neighbor.f >= i.f]) <= 0:
                 yet_to_visit.append(neighbor)
 
+    restore_spawn_and_end(maze)
+    maze.print('best_first.txt')
+
     # return None if path is not found
     return None
 
 #A star search        
-def a_star(maze):
+def a_star(original_maze):
+    maze = copy.deepcopy(original_maze)
+
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
     # initialize end node
@@ -219,15 +247,20 @@ def a_star(maze):
 
         #Mark current node as visited
         visited.append(current_node)
+        maze.board[current_node.position[0]][current_node.position[1]] = 'x'
 
         #If reached the goal, return the path solution
         if current_node == end_node:
             while current_node != start_node:
-                maze.a_star_solution.insert(0, current_node.position)
+                original_maze.a_star_solution.insert(0, current_node.position)
                 current_node = current_node.parent
-            maze.a_star_solution.insert(0, current_node.position)
+            original_maze.a_star_solution.insert(0, current_node.position)
 
-            return maze.a_star_solution
+            # prints result
+            restore_spawn_and_end(maze)
+            maze.print('a_start.txt')
+
+            return original_maze.a_star_solution
 
         moves = get_valid_moves(maze.board, current_node.position)
         
@@ -247,6 +280,10 @@ def a_star(maze):
             # if not, add to yet_to_visit list
             if len([i for i in yet_to_visit if neighbor == i and neighbor.f >= i.f]) <= 0:
                 yet_to_visit.append(neighbor)
+
+    # prints result
+    restore_spawn_and_end(maze)
+    maze.print('a_star.txt')
 
     # return None if path is not found
     return None
@@ -281,6 +318,11 @@ def hill_climbing(original_maze):
         # Stop movement if we reach the end
         if move == maze.end:
             original_maze.hill_climbing_solution.append(move)
+            
+            # Prints result
+            restore_spawn_and_end(maze)
+            maze.print('hill_climbing.txt')
+
             return original_maze.hill_climbing_solution
         else:
             prev_pos = cur_pos
@@ -295,6 +337,9 @@ def hill_climbing(original_maze):
             # Get new valid moves
             moves = get_valid_moves(maze.board, cur_pos)
 
+    # Prints result
+    restore_spawn_and_end(maze)
+    maze.print('hill_climbing.txt')
     # If we can't reach the end
     return None
        
@@ -311,11 +356,17 @@ class Maze:
         self.hill_climbing_solution = []
         self.cost = 1
 
-    def print(self):
+    def print(self, filename):
+        file = open(filename, 'w')
+        file.write(str(self.shape[0]) + ' ' + str(self.shape[1]) + '\n')
         for i in range(len(self.board)):
             for j in range(len(self.board[0])):
                 print(self.board[i][j], end=' ')
+                file.write(str(self.board[i][j]) + ' ')
             print()
+            file.write('\n')
+        file.close()
+
 
 #===================================#
 
