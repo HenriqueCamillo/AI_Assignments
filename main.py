@@ -143,12 +143,23 @@ class Node:
         return self.f < other.f
 
 
-#Manhattan distance used in A* heuristic
-def heuristic(current, end):
+#Manhattan distance used in A* and Best-First
+def manhattan(current, end):
     return ((abs(current.position[0] - end.position[0])) + (abs(current.position[1] - end.position[1])))
 
+#Euclidean distance used in A* and Best-First
+def euclidean(current, end):
+    return (((current.position[0] - end.position[0]) ** 2) +
+            ((current.position[1] - end.position[1]) ** 2))
+
 #Best First Search
+<<<<<<< HEAD
 def best_first(maze):
+=======
+def best_first(original_maze, heuristic):
+    maze = copy.deepcopy(original_maze)
+
+>>>>>>> origin/gyovana
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
     # initialize end node
@@ -191,7 +202,10 @@ def best_first(maze):
                 continue
             
             #Create f value according to heuristic
-            neighbor.f = heuristic(neighbor, end_node)
+            if heuristic == "manhattan":
+                neighbor.f = manhattan(neighbor, end_node)
+            elif heuristic == "euclidean":
+                neighbor.f = euclidean(neighbor, end_node)
 
             #Check if neighbor is in yet_to_visit list and if it has a lower f value,
             # if not, add to yet_to_visit list
@@ -203,7 +217,13 @@ def best_first(maze):
     return None
 
 #A star search        
+<<<<<<< HEAD
 def a_star(maze):
+=======
+def a_star(original_maze, heuristic):
+    maze = copy.deepcopy(original_maze)
+
+>>>>>>> origin/gyovana
     # initialize start node
     start_node = Node(None, tuple(maze.spawn))
     # initialize end node
@@ -249,7 +269,10 @@ def a_star(maze):
             
             #Create f,g and h values
             neighbor.g = current_node.g + maze.cost
-            neighbor.h = heuristic(neighbor, end_node)
+            if heuristic == "manhattan":
+                neighbor.h = manhattan(neighbor, end_node)
+            elif heuristic == "euclidean":
+                neighbor.h = euclidean(neighbor, end_node)
             neighbor.f = neighbor.g + neighbor.h
 
             #Check if neighbor is in yet_to_visit list and if it has a lower f value,
@@ -379,6 +402,7 @@ dfs_maze.print('dfs.txt')
 print("\nBest-First Search:")
 best_first_maze = copy.deepcopy(maze)
 start_time = time.time()
+solution = best_first(maze,"euclidean")
 
 solution = best_first(best_first_maze)
 print(best_first_maze.solution)
